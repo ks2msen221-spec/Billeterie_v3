@@ -43,6 +43,7 @@ create table billets (
   statut text not null default 'valide' check (statut in ('valide', 'utilise', 'annule')),
   signature_qr text not null,
   cree_par uuid references profiles(id) on delete set null,
+  cree_par_nom text, -- Nom affiché du commercial émetteur (dénormalisé pour performance)
   scanne_par uuid references profiles(id) on delete set null,
   scanne_le timestamptz,
   annule_par uuid references profiles(id) on delete set null,
@@ -183,3 +184,40 @@ $$ language plpgsql security definer;
 -- create trigger on_auth_user_created
 --   after insert on auth.users
 --   for each row execute procedure public.handle_new_user();
+
+-- ====================================================================
+-- FONCTION STOCKÉE : INCRÉMENTEUR ATOMIQUE DE NUMÉRO DE BILLET
+-- ====================================================================
+create or replace function incrementer_compteur(p_annee int)
+returns int as $$
+declare
+  v_dernier int;
+begin
+  insert into compteur_billets (annee, dernier_numero)
+  values (p_annee, 1)
+  on conflict (annee) do update
+  set dernier_numero = compteur_billets.dernier_numero + 1
+  returning dernier_numero into v_dernier;
+  return v_dernier;
+end;
+$$ language plpgsql security definer;
+
+-- ====================================================================
+-- INITIALISATION DU COMPTE ADMINISTRATEUR
+-- Exécutez cette requête APRÈS avoir créé l'utilisateur admin
+-- dans Supabase Auth > Users, en remplaçant l'UUID ci-dessous.
+-- ====================================================================
+-- INSERT INTO profiles (id, nom, prenom, role, actif)
+-- VALUES (
+--   'REMPLACER-PAR-UUID-DU-COMPTE-ADMIN',
+--   'Principal',
+--   'Admin',
+--   'admin',
+--   true
+-- );
+
+-- ====================================================================
+-- CORRECTION : Ajouter cree_par_nom si la table existe déjà
+-- (À exécuter si vous avez déjà créé la table sans cette colonne)
+-- ====================================================================
+-- ALTER TABLE billets ADD COLUMN IF NOT EXISTS cree_par_nom text;

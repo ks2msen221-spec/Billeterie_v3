@@ -195,7 +195,63 @@ export default {
       // Détecter si on doit utiliser Supabase en production, ou simuler localement
       const isSupabase = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
       const HMAC_SECRET = env.HMAC_SECRET || "some-extremely-secure-key-1234567890-abcdef";
+      // SUPABASE_ANON_KEY est requis pour l'auth utilisateur (password grant)
+      // Si non fourni, on utilise SERVICE_ROLE_KEY (peut causer des erreurs sur certains projets)
+      const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
       const localDB = isSupabase ? null : readDB();
+
+      // ==========================================
+      // ROUTE: HEALTH CHECK (DIAGNOSTIC)
+      // ==========================================
+      if (path === "/api/health" && method === "GET") {
+        return new Response(JSON.stringify({
+          status: "ok",
+          mode: isSupabase ? "supabase" : "mock_local",
+          supabase_url_set: !!env.SUPABASE_URL,
+          supabase_url_preview: env.SUPABASE_URL ? env.SUPABASE_URL.substring(0, 30) + '...' : null,
+          supabase_service_key_set: !!env.SUPABASE_SERVICE_ROLE_KEY,
+          supabase_anon_key_set: !!env.SUPABASE_ANON_KEY,
+          hmac_secret_set: !!env.HMAC_SECRET,
+          timestamp: new Date().toISOString()
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // ==========================================
+      // ROUTE: DEBUG AUTH (TEST SUPABASE CONNECTION)
+      // ==========================================
+      if (path === "/api/debug-auth" && method === "GET") {
+        if (!isSupabase) {
+          return new Response(JSON.stringify({ mode: "mock_local", message: "Supabase non configuré - variables manquantes", supabase_url_set: !!env.SUPABASE_URL, service_role_key_set: !!env.SUPABASE_SERVICE_ROLE_KEY }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        // Tester la connexion Supabase en appelant l'endpoint de health
+        try {
+          const testRes = await fetch(`${env.SUPABASE_URL}/rest/v1/`, {
+            headers: {
+              "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
+              "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`
+            }
+          });
+          // Tester si la table profiles existe
+          const profilesRes = await fetch(`${env.SUPABASE_URL}/rest/v1/profiles?limit=1`, {
+            headers: {
+              "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
+              "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`
+            }
+          });
+          const profilesData = await profilesRes.json();
+          return new Response(JSON.stringify({
+            mode: "supabase",
+            supabase_reachable: testRes.ok || testRes.status === 200,
+            supabase_status: testRes.status,
+            profiles_table_exists: profilesRes.ok,
+            profiles_count: Array.isArray(profilesData) ? profilesData.length : 0,
+            profiles_error: !profilesRes.ok ? profilesData : null,
+            anon_key_used: !!env.SUPABASE_ANON_KEY ? 'SUPABASE_ANON_KEY' : 'SUPABASE_SERVICE_ROLE_KEY (fallback)'
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        } catch(e) {
+          return new Response(JSON.stringify({ mode: "supabase", error: e.message, supabase_url: env.SUPABASE_URL?.substring(0, 30) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+      }
 
       // ==========================================
       // ROUTE: LOGIN
@@ -211,14 +267,21 @@ export default {
           const loginRes = await fetch(`${env.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
             method: "POST",
             headers: {
-              "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
+              "apikey": SUPABASE_ANON_KEY,
               "Content-Type": "application/json"
             },
             body: JSON.stringify({ email, password })
           });
           if (!loginRes.ok) {
             const errData = await loginRes.json();
-            return new Response(JSON.stringify({ error: errData.error_description || errData.error || "Identifiants de connexion invalides." }), { status: loginRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+            // Débogage détaillé de l'erreur Supabase
+            const errMsg = errData.error_description || errData.error || errData.msg || errData.message || "Identifiants de connexion invalides.";
+            const debugInfo = {
+              error: errMsg,
+              supabase_status: loginRes.status,
+              supabase_raw: errData
+            };
+            return new Response(JSON.stringify(debugInfo), { status: loginRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
           }
           const loginData = await loginRes.json();
           const userId = loginData.user.id;
