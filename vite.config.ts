@@ -14,6 +14,7 @@ function cloudflareWorkerPlugin() {
       server.middlewares.use(async (req: any, res: any, next: any) => {
         const url = req.url || '';
         if (url.startsWith('/api') || url.startsWith('/billet/telecharger')) {
+          console.log('API Request:', req.method, req.url);
           try {
             // Dynamically import the worker to ensure it is fresh
             const workerModule = await import('./cloudflare-worker.js');

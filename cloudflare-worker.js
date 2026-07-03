@@ -41,7 +41,7 @@ function readDB() {
         role: "admin",
         actif: true,
         // Mot de passe "Anopatuy2w" haché en SHA-256
-        passwordHash: "468c4a5c0d29623e1b12b59663ff9e56dc9f9a2b5e024fc8b99fe51a37c0245f",
+        passwordHash: "be10ff3686fc333f27899bdb35e520000c471fbfc11205b254a5c676b69bd8ef",
         created_at: new Date().toISOString()
       },
       {
@@ -52,7 +52,7 @@ function readDB() {
         role: "commercial",
         actif: true,
         // Mot de passe "commercial123" haché en SHA-256
-        passwordHash: "9a0083501a3fa4613ffda733a4664db136b6cb600e5e01f2f0120152914fb0f8",
+        passwordHash: "3488284c50e56274fc34504f6c6b8d336f79ccf32eb602b083df00f6757af40d",
         created_at: new Date().toISOString()
       }
     ],

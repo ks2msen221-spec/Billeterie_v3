@@ -1,0 +1,80 @@
+{
+  "profiles": [
+    {
+      "id": "admin-uuid-1111-2222",
+      "nom": "Principal",
+      "prenom": "Admin",
+      "email": "immodakar@proton.me",
+      "role": "admin",
+      "actif": true,
+      "passwordHash": "be10ff3686fc333f27899bdb35e520000c471fbfc11205b254a5c676b69bd8ef",
+      "created_at": "2026-07-03T04:24:20.060Z"
+    },
+    {
+      "id": "comm-uuid-1111-2222",
+      "nom": "Ndiaye",
+      "prenom": "Moussa",
+      "email": "commercial1@immodakar.sn",
+      "role": "commercial",
+      "actif": true,
+      "passwordHash": "3488284c50e56274fc34504f6c6b8d336f79ccf32eb602b083df00f6757af40d",
+      "created_at": "2026-07-03T04:24:20.060Z"
+    }
+  ],
+  "tarifs": [
+    {
+      "id": "t1",
+      "climatisation": "non_climatise",
+      "escorte": "sans_escorte",
+      "prix": 10000,
+      "actif": true
+    },
+    {
+      "id": "t2",
+      "climatisation": "climatise",
+      "escorte": "sans_escorte",
+      "prix": 12500,
+      "actif": true
+    },
+    {
+      "id": "t3",
+      "climatisation": "non_climatise",
+      "escorte": "avec_escorte",
+      "prix": 12500,
+      "actif": true
+    },
+    {
+      "id": "t4",
+      "climatisation": "climatise",
+      "escorte": "avec_escorte",
+      "prix": 15000,
+      "actif": true
+    }
+  ],
+  "billets": [
+    {
+      "id": "b1",
+      "numero_billet": "IMD-2026-000482",
+      "nom_passager": "Ndiaye",
+      "prenom_passager": "Moussa",
+      "telephone": "771234567",
+      "date_depart": "2026-07-15",
+      "heure_depart": "08:30",
+      "climatisation": "climatise",
+      "escorte": "avec_escorte",
+      "montant": 15000,
+      "statut": "valide",
+      "signature_qr": "mock-sig-1",
+      "cree_par": "comm-uuid-1111-2222",
+      "cree_par_nom": "Moussa Ndiaye",
+      "envoye": true,
+      "envoye_le": "2026-07-02T10:00:00.000Z",
+      "envoye_par": "comm-uuid-1111-2222",
+      "created_at": "2026-07-02T09:00:00.000Z"
+    }
+  ],
+  "compteur_billets": {
+    "2026": 482
+  },
+  "lockouts": {}
+}
