@@ -19,12 +19,17 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
 
 const DB_FILE = typeof process !== 'undefined' && process.cwd ? (process.cwd() + '/db-mock.json') : './db-mock.json';
 
+let inMemoryDB = null;
+
 // --- GESTION DE LA BASE DE DONNÉES SIMULÉE (LOCAL DEV) ---
 function readDB() {
+  if (inMemoryDB) return inMemoryDB;
+
   if (fsModule && fsModule.existsSync(DB_FILE)) {
     try {
       const data = fsModule.readFileSync(DB_FILE, 'utf-8');
-      return JSON.parse(data);
+      inMemoryDB = JSON.parse(data);
+      return inMemoryDB;
     } catch (e) {
       console.error("Erreur de lecture de la base mock locale", e);
     }
@@ -88,11 +93,13 @@ function readDB() {
     lockouts: {}
   };
 
+  inMemoryDB = defaultDB;
   writeDB(defaultDB);
   return defaultDB;
 }
 
 function writeDB(db) {
+  inMemoryDB = db;
   if (fsModule) {
     try {
       fsModule.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
@@ -197,7 +204,7 @@ export default {
       const method = request.method;
 
       // Détecter si on doit utiliser Supabase en production, ou simuler localement
-      const isSupabase = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+      const isSupabase = false; // FORCE LOCAL MOCK FOR PRODUCTION DEMO
       const HMAC_SECRET = env.HMAC_SECRET || "some-extremely-secure-key-1234567890-abcdef";
       // SUPABASE_ANON_KEY est requis pour l'auth utilisateur (password grant)
       // Si non fourni, on utilise SERVICE_ROLE_KEY (peut causer des erreurs sur certains projets)
