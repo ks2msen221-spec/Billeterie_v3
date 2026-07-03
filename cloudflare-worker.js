@@ -175,7 +175,11 @@ async function getUserProfile(userId, isSupabase, SUPABASE_URL, SUPABASE_SERVICE
 }
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, rawEnv, ctx) {
+    const env = { ...rawEnv };
+    if (env.SUPABASE_URL) {
+      env.SUPABASE_URL = env.SUPABASE_URL.trim().replace(/\/$/, "");
+    }
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, DELETE, OPTIONS",
