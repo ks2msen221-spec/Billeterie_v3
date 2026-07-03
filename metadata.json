@@ -1,0 +1,6 @@
+{
+  "name": "ImmoDakar Transport",
+  "description": "Plateforme sécurisée de génération, de signature HMAC-SHA256 et de vérification par scanneur de billets de transport.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
