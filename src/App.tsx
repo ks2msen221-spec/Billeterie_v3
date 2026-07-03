@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import React, { useState, useEffect, useRef } from 'react';
 import {
   TrendingUp,
@@ -73,6 +74,11 @@ interface Billet {
   envoye_par?: string;
   created_at: string;
 }
+
+// URL de base de l'API Worker Cloudflare
+// En dev local (Vite), les appels passent par le proxy Vite (URL relative)
+// En production, ils pointent vers le Worker API déployé
+const API_BASE = import.meta.env.DEV ? '' : 'https://immodakar-billetterie-api.cheikhsylla221-2097.workers.dev';
 
 export default function App() {
   // --- ÉTATS GLOBAUX D'AUTHENTIFICATION ---
@@ -292,7 +298,7 @@ export default function App() {
     setLoginError(null);
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
@@ -325,7 +331,7 @@ export default function App() {
   const fetchBillets = async () => {
     setLoadingBillets(true);
     try {
-      const res = await fetch('/api/billets', {
+      const res = await fetch(`${API_BASE}/api/billets`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -342,7 +348,7 @@ export default function App() {
   const fetchTarifs = async () => {
     setLoadingTarifs(true);
     try {
-      const res = await fetch('/api/tarifs', {
+      const res = await fetch(`${API_BASE}/api/tarifs`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -360,7 +366,7 @@ export default function App() {
   const fetchProfiles = async () => {
     setLoadingProfiles(true);
     try {
-      const res = await fetch('/api/admin/profiles', {
+      const res = await fetch(`${API_BASE}/api/admin/profiles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -395,7 +401,7 @@ export default function App() {
 
     setCreatingTicket(true);
     try {
-      const res = await fetch('/api/billets', {
+      const res = await fetch(`${API_BASE}/api/billets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -438,7 +444,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/billets/annuler', {
+      const res = await fetch(`${API_BASE}/api/billets/annuler`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -462,7 +468,7 @@ export default function App() {
   // Envoi WhatsApp et génération du billet signé Supabase
   const handleEnvoyerBillet = async (id: string, tel: string, passager: string, ref: string) => {
     try {
-      const res = await fetch('/api/billets/envoyer', {
+      const res = await fetch(`${API_BASE}/api/billets/envoyer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -497,7 +503,7 @@ export default function App() {
     setScanResult(null);
 
     try {
-      const res = await fetch('/api/billets/scan', {
+      const res = await fetch(`${API_BASE}/api/billets/scan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -555,7 +561,7 @@ export default function App() {
     setSavingTarifs(true);
     setTarifsSuccessMsg(null);
     try {
-      const res = await fetch('/api/tarifs', {
+      const res = await fetch(`${API_BASE}/api/tarifs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -583,7 +589,7 @@ export default function App() {
     setCommError(null);
 
     try {
-      const res = await fetch('/api/admin/profiles', {
+      const res = await fetch(`${API_BASE}/api/admin/profiles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -622,7 +628,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/admin/profiles', {
+      const res = await fetch(`${API_BASE}/api/admin/profiles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -650,7 +656,7 @@ export default function App() {
     if (!selectedCommForReset || !resetPasswordValue) return;
 
     try {
-      const res = await fetch('/api/admin/profiles', {
+      const res = await fetch(`${API_BASE}/api/admin/profiles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -689,7 +695,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(`${API_BASE}/api/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
