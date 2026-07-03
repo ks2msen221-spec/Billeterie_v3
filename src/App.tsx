@@ -75,10 +75,7 @@ interface Billet {
   created_at: string;
 }
 
-// URL de base de l'API Worker Cloudflare
-// En dev local (Vite), les appels passent par le proxy Vite (URL relative)
-// En production, ils pointent vers le Worker API déployé
-const API_BASE = import.meta.env.DEV ? '' : 'https://immodakar-billetterie-api.cheikhsylla221-2097.workers.dev';
+const API_BASE = '';
 
 export default function App() {
   // --- ÉTATS GLOBAUX D'AUTHENTIFICATION ---
